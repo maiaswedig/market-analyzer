@@ -32,15 +32,10 @@ function init() {
   state.settings = Object.assign({}, DEFAULT_SETTINGS, store.get(SETTINGS_KEY, {}) || {});
   // Migração para o modo de alta probabilidade: a partir desta versão,
   // sinais sem evidência estatística suficiente são bloqueados por padrão.
-  state.settings.highProbabilityMode = true;
-  state.settings.minScore = Math.max(Number(state.settings.minScore) || 0, 80);
-  state.settings.minConfluence = Math.max(Number(state.settings.minConfluence) || 0, 3);
-  state.settings.minSamples = Math.max(Number(state.settings.minSamples) || 0, 60);
-  state.settings.minSetupSamples = Math.max(Number(state.settings.minSetupSamples) || 0, 40);
-  state.settings.minProbability = Math.max(Number(state.settings.minProbability) || 0, 0.65);
-  state.settings.minProbabilitySamples = Math.max(Number(state.settings.minProbabilitySamples) || 0, 60);
-  state.settings.requireProbabilityCIAboveBreakEven = true;
-  state.settings.evGate = 'bloquear';
+ const numKeys = ['minScore','minConfluence','minSamples','minSetupSamples','minProbability','minProbabilitySamples'];
+numKeys.forEach(k => {
+  if (!Number.isFinite(Number(state.settings[k]))) state.settings[k] = DEFAULT_SETTINGS[k];
+});
   state.settings.autoLearn = true;
   state.settings.scannerCount = [10,15,20].includes(Number(state.settings.scannerCount)) ? Number(state.settings.scannerCount) : 20;
   saveSettings();
@@ -801,9 +796,9 @@ function renderScanner() {
   let rows = scanRows.slice();
   if (onlyF === 'signals') rows = rows.filter(r => r.verdict === 'CALL' || r.verdict === 'PUT');
   else if (onlyF === 'CALL' || onlyF === 'PUT') rows = rows.filter(r => r.verdict === onlyF);
-  if (gradeF === 'A+') rows = rows.filter(r => r.grade === 'A+');
-  else if (gradeF === 'AA+') rows = rows.filter(r => r.grade === 'A' || r.grade === 'A+');
-  else if (gradeF === 'B') rows = rows.filter(r => ['A+', 'A', 'B'].includes(r.grade));
+  if (gradeF !== 'todas') rows = rows.filter(r => r.grade === gradeF);
+  else if (gradeF !== 'todas') rows = rows.filter(r => r.grade === gradeF);
+  else if (gradeF !== 'todas') rows = rows.filter(r => r.grade === gradeF);
   rows = rows.filter(r => r.verdict === 'AGUARDAR' || r.verdict === 'ERRO' || r.score === null || r.score >= scoreMin);
   const gOrder = { 'A+': 5, A: 4, B: 3, C: 2, D: 1, '—': 0 };
   const vOrder = { CALL: 2, PUT: 2, AGUARDAR: 1, ERRO: 0 };
