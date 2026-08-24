@@ -1,0 +1,12 @@
+{
+  "name": "Market Analyzer v2",
+  "short_name": "Market Analyzer",
+  "description": "Análise da próxima vela — CALL, PUT ou AGUARDAR, com dados reais e números honestos.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0A0E16",
+  "theme_color": "#0A0E16",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

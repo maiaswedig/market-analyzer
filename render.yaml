@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: market-analyzer-backend
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    disk:
+      name: market-analyzer-data
+      mountPath: /app/backend-data
+      sizeGB: 10
+    envVars:
+      - key: COLLECTOR_TFS
+        value: M1,M5,M15,H1
+      - key: DEEP_CANDLES
+        value: "6000"
+      - key: LIVE_INTERVAL_MS
+        value: "60000"
+      - key: TRAIN_INTERVAL_MS
+        value: "900000"
+      - key: MIN_TRAIN_SAMPLES
+        value: "400"
+      - key: MAX_STORED_CANDLES
+        value: "7000"
+      - key: ADMIN_KEY
+        generateValue: true

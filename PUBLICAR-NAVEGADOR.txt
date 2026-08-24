@@ -1,0 +1,55 @@
+MARKET ANALYZER v2.1 — PUBLICAR E USAR NO NAVEGADOR
+===================================================
+
+OPÇÃO A — NO SEU PC
+--------------------
+1) Extraia esta pasta para um local fixo, por exemplo:
+   C:\MarketAnalyzer
+
+2) Dê dois cliques em:
+   ABRIR MARKET ANALYZER.bat
+
+3) O navegador abrirá:
+   http://localhost:8777
+
+Deixe a janela preta aberta enquanto estiver usando.
+Nada é instalado e o app roda localmente no seu computador.
+
+OPÇÃO B — TER UM LINK NO NAVEGADOR (MAIS PRÁTICO)
+---------------------------------------------------
+O jeito mais simples é o Vercel Drop:
+
+1) Entre em:
+   https://vercel.com/drop
+
+2) Arraste o ZIP do Market Analyzer para a página.
+   O ZIP desta versão já está preparado para ter o index.html na raiz.
+
+3) Faça login/crie uma conta Vercel quando solicitado.
+
+4) Clique em Deploy.
+
+5) O Vercel cria uma URL própria do projeto, no formato aproximado:
+   https://seu-projeto.vercel.app
+
+Depois disso, você pode abrir o Market Analyzer direto pelo navegador, sem
+rodar o .bat no computador.
+
+IMPORTANTE SOBRE PRIVACIDADE
+----------------------------
+A URL de produção do Vercel normalmente é acessível pela internet. Um link
+"só seu" no sentido de ninguém mais conseguir abrir exige uma camada de
+proteção/acesso; ter uma URL exclusiva não significa que ela seja privada.
+
+ATUALIZAÇÕES
+------------
+Para facilitar novas versões, mantenha este ZIP salvo. Você pode publicar uma
+nova versão no Vercel e depois conectar o projeto a um repositório Git para ter
+atualizações automáticas.
+
+DADOS E SEGURANÇA
+-----------------
+O Market Analyzer é uma aplicação estática no navegador. Ele não executa
+ordens. Os dados de mercado são buscados pelas fontes públicas previstas no
+código. Histórico e configurações ficam no armazenamento do navegador quando
+este estiver disponível.

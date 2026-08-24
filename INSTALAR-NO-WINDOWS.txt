@@ -1,0 +1,37 @@
+MARKET ANALYZER — como deixar no seu computador (Windows)
+=========================================================
+
+1) Descompacte a pasta "market-analyzer" em algum lugar fixo, por exemplo:
+   C:\MarketAnalyzer
+
+2) Dentro da pasta, dê dois cliques em:
+   ABRIR MARKET ANALYZER.bat
+
+   O programa abre sozinho no seu navegador.
+   Deixe a janela preta aberta enquanto estiver usando (é o servidor local).
+   Para fechar o programa, feche a janela preta.
+
+3) Atalho na área de trabalho (opcional):
+   Clique com o botão direito em "ABRIR MARKET ANALYZER.bat"
+   > Enviar para > Área de trabalho (criar atalho)
+   Depois, no atalho: botão direito > Propriedades > Alterar ícone,
+   e escolha o ícone que preferir.
+
+COMO FUNCIONA
+O .bat sobe um servidor local só no seu PC (http://localhost:8777) e abre o
+navegador nele. Se você tiver Python instalado, ele usa o Python; se não tiver,
+usa o PowerShell, que já vem no Windows. Nada é instalado.
+
+Assim o histórico de sinais fica salvo no navegador entre as sessões.
+Não abra o index.html com dois cliques: por segurança o navegador bloqueia
+esse modo e a tela fica vazia. Use sempre o .bat.
+
+Se quiser, instale o Python (grátis) em https://www.python.org/downloads/
+marcando "Add Python to PATH" — deixa a abertura ainda mais rápida.
+
+--------------------------------------------------------------------
+Importante: nada é instalado no sistema e nada é enviado para fora.
+O app busca apenas dados públicos de mercado (OKX, Coinbase, Kraken,
+Yahoo Finance) e os widgets do TradingView. Precisa de internet.
+Ele NÃO executa ordens em corretora nenhuma.
+--------------------------------------------------------------------

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MARKET ANALYZER v3 — análise da próxima vela</title>
+<meta name="description" content="Análise técnica e estatística honesta da próxima vela: COMPRA, VENDA ou AGUARDAR, com score por categorias, expectativa matemática e backtest causal. Não executa ordens.">
+<meta name="theme-color" content="#0A0E16">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Market Analyzer v2 — análise da próxima vela">
+<meta property="og:description" content="COMPRA, VENDA ou AGUARDAR com score por categorias, expectativa matemática e backtest causal. Dados reais, números honestos.">
+<meta property="og:image" content="favicon.svg">
+<meta name="twitter:card" content="summary">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="backend-config.js"></script>
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 20V4M4 20h16"/><path d="M8 16V9M12 16V6M16 16v-5M20 16v-8"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M4 12h16"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 7v5l3.5 2"/><path d="M20.5 12a8.5 8.5 0 1 1-3-6.5"/><path d="M20.5 3v3.5H17"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 5a3 3 0 0 0-6 0 3 3 0 0 0-1 5.8A3 3 0 0 0 7 17a3 3 0 0 0 5 2z"/><path d="M12 5a3 3 0 0 1 6 0 3 3 0 0 1 1 5.8A3 3 0 0 1 17 17a3 3 0 0 1-5 2z"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.5v2M12 18.5v2M4.9 7.5l1.7 1M17.4 15.5l1.7 1M4.9 16.5l1.7-1M17.4 8.5l1.7-1"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 3h6M10 3v6L5.5 17A2 2 0 0 0 7.3 20h9.4a2 2 0 0 0 1.8-3L14 9V3"/><path d="M7.5 14h9"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 9a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 13 6 9Z"/><path d="M10 18a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 4.5 21 19.5H3z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol>
+</svg>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<header class="topbar">
+  <div class="topbar__brand">
+    <svg class="logo" viewBox="0 0 32 32" aria-label="Logotipo Market Analyzer" role="img" fill="none">
+      <rect x="1.5" y="1.5" width="29" height="29" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".45"/>
+      <line x1="9" y1="6" x2="9" y2="26" stroke="currentColor" stroke-width="1.4"/>
+      <rect x="6.5" y="11" width="5" height="9" fill="currentColor"/>
+      <line x1="16" y1="4" x2="16" y2="28" stroke="currentColor" stroke-width="1.4"/>
+      <rect x="13.5" y="8" width="5" height="12" stroke="currentColor" stroke-width="1.4"/>
+      <line x1="23" y1="8" x2="23" y2="27" stroke="currentColor" stroke-width="1.4"/>
+      <rect x="20.5" y="14" width="5" height="8" fill="currentColor" opacity=".55"/>
+    </svg>
+    <div class="topbar__title">
+      <strong>MARKET ANALYZER <span class="tag">v2</span></strong>
+      <span>próxima vela · COMPRA / VENDA / AGUARDAR · dados reais, números honestos</span>
+    </div>
+  </div>
+  <div class="topbar__right">
+    <span id="brokerFlag" class="badge badge--err" hidden>⚠️ NÃO OPERAR — feed divergente</span>
+    <label class="check" title="Alertas só para setups A e A+"><input id="alertToggle" type="checkbox"> <svg class="ico"><use href="#i-bell"/></svg> ALERTA</label>
+    <span id="backendStatus" class="badge badge--err" title="Coleta autônoma">● BACKEND</span>
+    <span id="clock" class="mono muted"></span>
+    <button id="themeBtn" class="btn btn--ghost" type="button" title="Alternar tema">Tema claro</button>
+  </div>
+</header>
+
+<div id="storageNotice" class="notice notice--warn" hidden></div>
+
+<nav class="tabs" role="tablist">
+  <button class="tab is-active" data-tab="scanner" role="tab"><svg class="ico"><use href="#i-scan"/></svg> 🔥 MELHORES OPORTUNIDADES</button>
+  <button class="tab" data-tab="operacao" role="tab"><svg class="ico"><use href="#i-target"/></svg> 🎯 SINAL ATUAL</button>
+  <button class="tab" data-tab="analise" role="tab"><svg class="ico"><use href="#i-chart"/></svg> ANÁLISE</button>
+  <button class="tab" data-tab="historico" role="tab"><svg class="ico"><use href="#i-history"/></svg> HISTÓRICO</button>
+  <button class="tab" data-tab="corretora" role="tab"><svg class="ico"><use href="#i-image"/></svg> CORRETORA</button>
+  <button class="tab" data-tab="config" role="tab"><svg class="ico"><use href="#i-gear"/></svg> CONFIGURAÇÕES</button>
+</nav>
+
+<main class="wrap">
+
+<!-- ======================= MODO OPERAÇÃO ======================= -->
+<section id="tab-operacao" class="tabpanel">
+  <div id="opScreen" class="opscreen">
+    <div class="skeleton skeleton--verdict"></div>
+  </div>
+</section>
+
+<!-- ======================= ANÁLISE ======================= -->
+<section id="tab-analise" class="tabpanel">
+  <div class="controls card">
+    <div class="field">
+      <label for="assetSelect">Ativo</label>
+      <input id="assetSearch" type="search" placeholder="Buscar ativo…" autocomplete="off">
+      <select id="assetSelect"></select>
+    </div>
+    <div class="field">
+      <label for="customAsset">Símbolo personalizado</label>
+      <div class="row">
+        <input id="customAsset" type="text" placeholder="Ex.: TONUSDT">
+        <button id="addCustom" class="btn btn--ghost" type="button">Adicionar</button>
+      </div>
+    </div>
+    <div class="field field--grow">
+      <label>Timeframe da vela prevista</label>
+      <div id="tfButtons" class="tfbtns"></div>
+    </div>
+    <div class="field">
+      <label>Ações</label>
+      <div class="row">
+        <button id="analyzeBtn" class="btn btn--primary" type="button">ANALISAR</button>
+        <label class="check"><input id="autoRefresh" type="checkbox"> auto</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="srcline">
+    <span id="srcBadge" class="badge">fonte: —</span>
+    <span id="srcMeta" class="mono muted small"></span>
+    <span id="volBadge" class="badge badge--warn" hidden>sem volume real nesta fonte</span>
+    <span id="aggBadge" class="badge badge--warn" hidden></span>
+  </div>
+
+  <div id="verdictCard" class="card card--verdict"><div class="skeleton skeleton--verdict"></div></div>
+
+  <div class="grid grid--analysis">
+    <div class="col">
+      <div id="whyCard" class="card"></div>
+      <div class="card card--chart">
+        <div class="card__head">
+          <h2>Gráfico próprio (candles reais + EMAs + zonas)</h2>
+          <div class="row">
+            <button class="chip is-active" data-chartview="own" type="button">Nosso gráfico</button>
+            <button class="chip" data-chartview="tv" type="button">Referência visual TradingView</button>
+          </div>
+        </div>
+        <div id="ownChart" class="ownchart"></div>
+        <div id="tvChart" class="tvchart" hidden></div>
+        <p class="small muted">Candles, EMAs 9/21/50/200, volume e zonas vêm dos feeds públicos (OKX/Coinbase/Kraken/Yahoo). A análise usa o <strong>momento atual da vela</strong>; os indicadores históricos permanecem reais e o último ponto projetado é mostrado no slot da <strong>PRÓXIMA VELA</strong>, que é o alvo do sinal. O widget do TradingView é apenas referência visual.</p>
+      </div>
+      <details id="metricsCard" class="card details" open></details>
+      <details id="catCard" class="card details"></details>
+      <details id="mtfCard" class="card details"></details>
+      <details id="paCard" class="card details"></details>
+      <details id="zoneCard" class="card details"></details>
+      <details id="penaltyCard" class="card details"></details>
+      <details id="explainCard" class="card details"></details>
+      <details id="detailCard" class="card details"></details>
+    </div>
+    <div class="col">
+      <div id="diagCard" class="card"></div>
+      <div class="card">
+        <div class="card__head"><h2>Status das fontes</h2></div>
+        <div id="healthPanel" class="mono small muted">—</div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+<!-- ======================= BUSCADOR (MELHORES OPORTUNIDADES) ======================= -->
+<section id="tab-scanner" class="tabpanel is-active">
+  <p class="scanner-intro">
+    <strong>Modo Alta Probabilidade:</strong> analisa um universo controlado de <strong>10, 15 ou 20 ativos</strong>, priorizando qualidade e velocidade em vez de dezenas superficialmente.
+    Ordenado por <strong>score, confluência e qualidade</strong> — não só pelo maior número.
+  </p>
+  <div class="controls card scanner-controls">
+    <div class="field"><label for="scanMarket">Mercado</label>
+      <select id="scanMarket"><option value="Cripto">Criptomoedas</option><option value="Forex">Forex</option><option value="Ambos">Cripto + Forex</option></select>
+    </div>
+    <div class="field field--grow"><label>Timeframe</label><div id="scanTfs" class="tfbtns"></div></div>
+    <div class="field"><label for="scanCount">Ativos</label>
+      <select id="scanCount"><option value="10" selected>TOP 10</option><option value="15">TOP 15</option><option value="20">TOP 20</option></select>
+      <span id="scanUniverseNote" class="muted small"></span>
+    </div>
+    <div class="field"><label>&nbsp;</label><button id="scanBtn" class="btn btn--primary btn--scan" type="button">🔎 BUSCAR MELHOR OPORTUNIDADE</button></div>
+  </div>
+  <details class="advanced-filters">
+    <summary>Filtros avançados</summary>
+    <div class="controls card controls--nested">
+      <div class="field"><label for="scanScoreMin">Score mínimo</label>
+        <select id="scanScoreMin"><option value="60">60</option><option value="65">65</option><option value="70">70</option><option value="75">75</option><option value="80" selected>80</option></select>
+      </div>
+      <div class="field"><label for="scanGrade">Qualidade mínima</label>
+        <select id="scanGrade"><option value="">todas</option><option value="AA+">A ou melhor</option><option value="A+" selected>só A+</option><option value="B">B ou melhor</option></select>
+      </div>
+      <div class="field"><label for="scanOnly">Sinais</label>
+        <select id="scanOnly"><option value="all">mostrar tudo</option><option value="signals">somente sinais</option><option value="CALL">só COMPRA</option><option value="PUT">só VENDA</option></select>
+      </div>
+    </div>
+  </details>
+  <div id="scanProgress" class="progress" hidden><div class="progress__bar"></div><span class="progress__label mono"></span></div>
+  <div id="scanBest" class="card" hidden></div>
+  <div id="scanStats" class="card" hidden></div>
+  <div id="scanResults" class="card"><p class="muted">Escolha mercado, timeframes e quantidade (10, 15 ou 20 ativos). A varredura é sequencial. O aprendizado automático roda em segundo plano, gira pelos ativos e persiste os resultados no navegador enquanto esta página estiver aberta.</p></div>
+</section>
+
+<!-- ======================= BACKTEST ======================= -->
+<section id="tab-backtest" class="tabpanel">
+  <div class="controls card">
+    <div class="field"><label for="btAsset">Ativo</label><select id="btAsset"></select></div>
+    <div class="field"><label for="btTf">Timeframe</label><select id="btTf"></select></div>
+    <div class="field"><label for="btMax">Velas avaliadas</label><input id="btMax" type="number" min="100" max="2000" value="1000"></div>
+    <div class="field"><label for="btCandles">Candles carregados</label><input id="btCandles" type="number" min="1000" max="20000" step="500" value="6000"></div>
+    <div class="field"><label for="btHours">Horas (0-23, vazio = todas)</label><input id="btHours" type="text" placeholder="ex.: 9,10,11,14"></div>
+    <div class="field"><label for="btBanca">Banca inicial (R$)</label><input id="btBanca" type="number" min="10" step="10" value="250"></div>
+    <div class="field"><label for="btStake">Valor por operação (R$)</label><input id="btStake" type="number" min="1" step="1" value="5"></div>
+    <div class="field"><label for="btPayout">Payout (%)</label><input id="btPayout" type="number" min="10" max="100" value="85"></div>
+    <div class="field"><label>&nbsp;</label><button id="btRun" class="btn btn--primary" type="button">RODAR BACKTEST</button></div>
+    <div class="field"><label>&nbsp;</label><button id="btCausal" class="btn btn--ghost" type="button">Testar causalidade (sem lookahead)</button></div>
+  </div>
+  <div class="notice"><strong>Aprendizado automático:</strong> o navegador coleta candles históricos dos feeds disponíveis, executa backtests causais e recalibra os modelos periodicamente. <strong>Para continuar coletando com a página fechada, é necessário um backend/cron.</strong><br><strong>TradingView:</strong> o gráfico embutido é referência visual; ele não fornece candles ao JavaScript da página. Os candles de cálculo continuam vindo dos provedores de dados configurados. Para usar dados oficiais do TradingView no motor, é necessária uma fonte/API com autorização de dados.<br><br><strong>Backtest automático:</strong> o motor percorre candles já fechados, gera o sinal de forma causal e compara com a próxima vela. O mesmo histórico alimenta o ranking de setups e, em segundo plano, a calibração do modelo.</div>
+  <div id="btProgress" class="progress" hidden><div class="progress__bar"></div><span class="progress__label mono"></span></div>
+  <div id="btResults" class="card"><p class="muted">Rode o backtest para ver a distribuição real COMPRA/VENDA/AGUARDAR, a varredura de limiares com expectativa matemática, a simulação de banca e as tabelas por horário/score/qualidade.</p></div>
+</section>
+
+<!-- ======================= APRENDIZADO ======================= -->
+<section id="tab-aprendizado" class="tabpanel">
+  <div class="grid grid--two">
+    <div class="col">
+      <div class="card">
+        <div class="card__head"><h2>Modelo calibrado (regressão logística)</h2><span class="muted small">treina no seu navegador, com histórico real do ativo/TF atual</span></div>
+        <div class="row row--wrap">
+          <button id="trainBtn" class="btn btn--primary" type="button">Treinar modelo</button>
+          <span id="mlProgress" class="mono muted small"></span>
+        </div>
+        <div id="mlPanel" class="mlpanel muted small">Nenhum modelo treinado nesta sessão.</div>
+      </div>
+      <div class="card">
+        <div class="card__head"><h2>Curva de confiabilidade (calibração)</h2><span class="muted small">previsto × realizado, por decil</span></div>
+        <canvas id="relChart" class="minichart"></canvas>
+        <div id="relTable"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="card__head"><h2>Aprendizado de setups</h2><span class="muted small">agrega backtest + histórico real verificado</span></div>
+        <div class="row row--wrap">
+          <button id="learnBtn" class="btn btn--primary" type="button">Atualizar ranking de setups</button>
+          <span id="learnStatus" class="mono muted small"></span>
+        </div>
+        <div id="setupPanel"><p class="muted small">Rode um backtest (ou acumule histórico verificado) para o ranking aparecer. Só classes com amostra mínima entram no ranking.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= HISTÓRICO ======================= -->
+<section id="tab-historico" class="tabpanel">
+  <div class="controls card">
+    <div class="field"><label for="hAsset">Ativo</label><select id="hAsset"><option value="">todos</option></select></div>
+    <div class="field"><label for="hTf">Timeframe</label><select id="hTf"><option value="">todos</option></select></div>
+    <div class="field"><label for="hSignal">Sinal</label><select id="hSignal"><option value="">todos</option><option value="CALL">COMPRA</option><option value="PUT">VENDA</option><option value="AGUARDAR">AGUARDAR</option></select></div>
+    <div class="field"><label for="hGrade">Qualidade</label><select id="hGrade"><option value="">todas</option><option>A+</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+    <div class="field"><label for="hStatus">Resultado</label><select id="hStatus"><option value="">todos</option><option value="ACERTO">ACERTO</option><option value="ERRO">ERRO</option><option value="NEUTRO">NEUTRO</option><option value="PENDENTE">PENDENTE</option><option value="N/A">não operável</option></select></div>
+    <div class="field"><label for="hMinScore">Score de</label><input id="hMinScore" type="number" min="0" max="100" placeholder="0"></div>
+    <div class="field"><label for="hMaxScore">até</label><input id="hMaxScore" type="number" min="0" max="100" placeholder="100"></div>
+    <div class="field"><label for="hFrom">Data de</label><input id="hFrom" type="date"></div>
+    <div class="field"><label for="hTo">até</label><input id="hTo" type="date"></div>
+  </div>
+  <div class="controls card">
+    <div class="field"><label>&nbsp;</label><button id="hCheck" class="btn btn--primary" type="button">Verificar pendentes</button></div>
+    <div class="field"><label>&nbsp;</label><button id="hExportJson" class="btn btn--ghost" type="button">Exportar JSON</button></div>
+    <div class="field"><label>&nbsp;</label><button id="hExportCsv" class="btn btn--ghost" type="button">Exportar CSV</button></div>
+    <div class="field"><label for="hImport">Importar JSON</label><input id="hImport" type="file" accept="application/json"></div>
+    <div class="field"><label>&nbsp;</label><button id="hClear" class="btn btn--danger" type="button">Limpar histórico</button></div>
+  </div>
+  <div id="hStats" class="card"></div>
+  <div class="card">
+    <div class="card__head"><h2>Evolução da taxa de acerto</h2><span class="muted small">acumulada, na ordem cronológica dos sinais verificados</span></div>
+    <canvas id="hEvoChart" class="minichart"></canvas>
+  </div>
+  <div id="hTable" class="card"></div>
+</section>
+
+<!-- ======================= CORRETORA ======================= -->
+<section id="tab-corretora" class="tabpanel">
+  <div class="notice">A comparação é <strong>assistida/manual</strong>: o app <strong>não lê a imagem automaticamente</strong> (não há OCR). A imagem fica só no seu navegador (URL local), nada é enviado a servidor. Você informa o que vê no print e o app confere com o feed real.</div>
+  <div class="grid grid--two">
+    <div class="col">
+      <div class="card">
+        <div class="card__head"><h2>🖼️ Print da sua corretora</h2></div>
+        <div id="dropZone" class="dropzone">
+          <p>Arraste o print aqui ou <label class="linklike">escolha um arquivo<input id="brokerFile" type="file" accept="image/png,image/jpeg,image/webp" hidden></label></p>
+          <p class="small muted">PNG, JPG ou WEBP</p>
+        </div>
+        <div id="brokerPreview" class="brokerpreview" hidden><img id="brokerImg" alt="print da corretora"></div>
+      </div>
+      <div class="card">
+        <div class="card__head"><h2>Checklist de verificação</h2></div>
+        <div class="fields">
+          <label>Ativo mostrado na corretora <input id="bkAsset" type="text" placeholder="ex.: BTCUSDT"></label>
+          <label>Timeframe <select id="bkTf"></select></label>
+          <label>Horário da última vela (HH:MM) <input id="bkTime" type="time"></label>
+          <label>Preço aproximado <input id="bkPrice" type="text" inputmode="decimal" placeholder="ex.: 64350.5"></label>
+        </div>
+        <div class="row row--wrap">
+          <button id="bkCompare" class="btn btn--primary" type="button">COMPARAR COM O FEED</button>
+          <button id="bkReset" class="btn btn--ghost" type="button">Limpar divergência</button>
+        </div>
+        <div id="bkResult"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card card--chart">
+        <div class="card__head"><h2>Nosso gráfico (mesmo ativo/TF da análise)</h2></div>
+        <div id="bkChart" class="ownchart"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= CONFIGURAÇÕES ======================= -->
+<section id="tab-config" class="tabpanel">
+  <div class="grid grid--config">
+    <div class="card">
+      <div class="card__head"><h2>Decisão e limiares</h2></div>
+      <div class="row row--wrap" id="modeBtns">
+        <button class="btn btn--ghost" data-mode="conservador" type="button">Conservador</button>
+        <button class="btn btn--ghost" data-mode="normal" type="button">Normal</button>
+        <button class="btn btn--ghost" data-mode="agressivo" type="button">Agressivo</button>
+      </div>
+      <div class="fields">
+        <label>Ativo padrão <select id="cfgAsset"></select></label>
+        <label>Timeframe padrão <select id="cfgTf"></select></label>
+        <label title="Score técnico mínimo (0–100, 50 = neutro)">Score mínimo <input id="cfgMinScore" type="number" min="0" max="100"></label>
+        <label title="Quantos timeframes precisam concordar">Confluência mínima (0 = desligado) <input id="cfgMinConf" type="number" min="0" max="4"></label>
+        <label>Amostra mínima de análogos <input id="cfgMinSamples" type="number" min="5" max="500"></label>
+        <label>Amostra mínima da classe de setup <input id="cfgMinSetup" type="number" min="5" max="500"></label>
+        <label>Distância máx. de similaridade <input id="cfgMaxDist" type="number" min="1" max="12" step="0.1"></label>
+        <label>Distância mínima até a zona (ATR) <input id="cfgMinZone" type="number" min="0" max="2" step="0.05"></label>
+        <label title="'aviso' nunca bloqueia por falta de estatística">Trava de expectativa <select id="cfgEvGate"><option value="aviso">aviso (recomendado)</option><option value="bloquear">bloquear se EV ≤ 0</option></select></label>
+        <label>Candles carregados (histórico profundo) <input id="cfgDeep" type="number" min="1000" max="20000" step="500"></label>
+        <label>Intervalo do auto-refresh (s) <input id="cfgRefresh" type="number" min="10" max="600"></label>
+      </div>
+      <div id="thresholdList" class="small muted"></div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Simulação financeira</h2></div>
+      <div class="fields">
+        <label>Banca inicial (R$) <input id="cfgBanca" type="number" min="10" step="10"></label>
+        <label>Valor por operação (R$) <input id="cfgStake" type="number" min="1" step="1"></label>
+        <label>Payout (%) <input id="cfgPayout" type="number" min="10" max="100"></label>
+        <label>Tolerância de preço da corretora (%) <input id="cfgBrokerTol" type="number" min="0.01" max="5" step="0.01"></label>
+      </div>
+      <p id="breakEvenNote" class="small"></p>
+      <p class="small muted">Sem martingale: o valor por operação é sempre fixo. Uma taxa de acerto de 75% pode <strong>perder dinheiro</strong> se o payout for baixo — a expectativa matemática é o que decide.</p>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Categorias e pesos</h2></div>
+      <div id="weightList" class="fields"></div>
+      <div id="toggleList" class="fields"></div>
+    </div>
+    <div class="card">
+      <div class="card__head"><h2>Alertas</h2></div>
+      <div class="fields">
+        <label class="check"><input id="cfgOnlyA" type="checkbox"> Somente setups A e A+</label>
+        <label class="check"><input id="cfgSound" type="checkbox"> Som (WebAudio)</label>
+        <label class="check"><input id="cfgVisual" type="checkbox"> Alerta visual (toast)</label>
+        <label class="check"><input id="cfgNotif" type="checkbox"> Notificação do navegador</label>
+        <button id="notifPerm" class="btn btn--ghost" type="button">Permitir notificações</button>
+        <button id="testAlert" class="btn btn--ghost" type="button">Testar alerta</button>
+        <label class="check"><input type="checkbox" disabled> Telegram (futuro)</label>
+        <label class="check"><input type="checkbox" disabled> Discord (futuro)</label>
+        <label class="check"><input id="cfgUseMl" type="checkbox"> Usar modelo calibrado na decisão (quando validado)</label>
+        <label class="check"><input id="cfgAutoLearn" type="checkbox"> Aprendizado automático em segundo plano</label>
+      </div>
+      <p id="notifStatus" class="muted small"></p>
+      <button id="cfgReset" class="btn btn--danger" type="button">Restaurar padrões</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p><strong>MARKET ANALYZER v3</strong> — análise técnica e estatística 100% no navegador, sem chaves de API.
+  Dados: OKX (principal em cripto, com paginação de histórico), Coinbase e Kraken (cripto e pares fiat reais de forex) e Yahoo Finance via proxies CORS públicos como reserva.
+  Gráfico próprio com TradingView Lightweight Charts; o widget Advanced Chart do TradingView é apenas referência visual.</p>
+
+</footer>
+
+<script type="module" src="js/app.js"></script>
+<script type="module">import {backendHealth} from "./js/backend.js"; const el=document.getElementById("backendStatus"); async function p(){const h=await backendHealth(); if(!h){el.textContent="○ BACKEND OFF";el.className="badge badge--err";return;} const s=h.collector||{}; el.textContent=s.running?"● COLETANDO":"● AUTÔNOMO";el.className="badge badge--ok";el.title=`Ciclo ${s.cycle||0} · ${s.lastCycleAt?new Date(s.lastCycleAt).toLocaleTimeString():"aguardando"}`;} p(); setInterval(p,15000);</script>
+</body>
+</html>

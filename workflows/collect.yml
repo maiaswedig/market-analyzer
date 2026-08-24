@@ -1,0 +1,43 @@
+name: Coleta e treino (grátis, sem servidor)
+
+on:
+  schedule:
+    # A cada 15 min. O GitHub não garante o minuto exato (pode atrasar em horários
+    # de pico), então trate isso como "atualizado a cada ~15-25 min", não em tempo real.
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {} # permite rodar manualmente pela aba Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect-once
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Rodar coleta + treino (uma passada)
+        env:
+          COLLECTOR_TFS: 'M5,M15,H1'
+          DEEP_CANDLES: '4000'
+          MAX_STORED_CANDLES: '6000'
+          MIN_TRAIN_SAMPLES: '400'
+          TRAIN_INTERVAL_MS: '10800000' # 3h
+        run: node collect-once.mjs
+
+      - name: Commitar dados atualizados
+        run: |
+          git config user.name "market-analyzer-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add backend-data
+          git diff --cached --quiet && echo "sem mudanças" || git commit -m "chore: atualiza dados coletados [skip ci]"
+          git push
